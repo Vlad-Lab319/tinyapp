@@ -32,15 +32,22 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  console.log(generateRandomString());
-  urlDatabase[generateRandomString()] = req.body.longURL;
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let shortURLGenerated = generateRandomString();
+  console.log(shortURLGenerated);
+  urlDatabase[shortURLGenerated] = req.body.longURL;
+  res.redirect(`/urls/${shortURLGenerated}`);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  console.log(longURL);
+  res.redirect(longURL);
 });
 
 let randomString;
 
 function generateRandomString() {
-  randomString =  Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 6);
+  randomString =  Math.random().toString(36).replace(/\W+/, '').substr(0, 6);
   return randomString;
 }
 
