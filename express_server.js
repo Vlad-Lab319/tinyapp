@@ -30,6 +30,20 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  console.log(generateRandomString());
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+
+let randomString;
+
+function generateRandomString() {
+  randomString =  Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 6);
+  return randomString;
+}
+
+
 //tutorial paths below that line
 
 app.get("/urls.json", (req, res) => {
