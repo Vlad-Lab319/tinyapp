@@ -80,8 +80,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // Login feature
 app.post("/login", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  
+  console.log('Login req body: ', req.body);  // Log the POST request body to the console
+  const cookies = req.body.username;
+
+  res.cookie('username', `${cookies}`);
+  console.log('Cookies: ', cookies);
   res.redirect(`/urls/`);
 });
 
