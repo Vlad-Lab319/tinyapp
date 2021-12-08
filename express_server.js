@@ -132,6 +132,22 @@ app.get('/register', (req, res) => {
   res.render('user_reg', templateVars);
 });
 
+// POST / register endpoint
+app.post('/register', (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  let userID = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  users[userID] = {
+    id: userID,
+    email: email,
+    password: password
+  }
+  res.cookie('user_id', userID);
+  console.log(users[userID]);
+  res.redirect('/urls');
+});
+
 // Random string generator
 function generateRandomString() {
   let randomString =  Math.random().toString(36).replace(/\W+/, '').substr(0, 6);
