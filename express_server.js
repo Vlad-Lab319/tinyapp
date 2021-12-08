@@ -99,7 +99,7 @@ app.post("/login", (req, res) => {
   res.redirect(`/urls/`);
 });
 
-// Logout 
+// Logout endpoint
 app.post("/logout", (req, res) => {
   // const cookies = req.body.username;
 
@@ -108,6 +108,14 @@ app.post("/logout", (req, res) => {
   res.redirect(`/urls/`);
 });
 
+// Register endpoint
+app.get('/register', (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+    // ... any other vars
+  };
+  res.render('user_reg', templateVars);
+});
 
 // Random string generator
 function generateRandomString() {
