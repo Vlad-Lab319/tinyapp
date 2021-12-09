@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -36,15 +37,15 @@ const users = {
 }
 
 
-app.get("/", (req, res) => {
-  // Cookies that have not been signed
-  console.log('Cookies: ', req.cookies);
+// app.get("/", (req, res) => {
+//   // Cookies that have not been signed
+//   console.log('Cookies: ', req.cookies);
 
-  // Cookies that have been signed
-  console.log('Signed Cookies: ', req.signedCookies);
+//   // Cookies that have been signed
+//   console.log('Signed Cookies: ', req.signedCookies);
 
-  res.send("Hello!");
-});
+//   res.send("Hello!");
+// });
 
 
 // Add new links pair view endpoint
@@ -176,12 +177,15 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   
   const user = findUserByEmail(email);
+
+  const checkPassword = bcrypt.compareSync(password, user.password);
+  
   
   if (!user) {
     return res.status(403).send("User with such e-mail is not found");
   }
 
-  if(user.password !== password) {
+  if(!checkPassword) {
     return res.status(403).send("Password does not mutch");
   }
 
@@ -233,10 +237,12 @@ app.post('/register', (req, res) => {
     return res.status(400).send("User with such e-mail already exists")
   }
 
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   users[userID] = {
     id: userID,
     email: email,
-    password: password
+    password: hashedPassword
   }
   res.cookie('user_id', userID);
   console.log(users[userID]);
