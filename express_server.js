@@ -80,13 +80,19 @@ app.get("/urls", (req, res) => {
 
 // Show certain pair details
 app.get("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  if (!findShortUrlInUrlDatabase(shortURL)) {
+    return res.status(403).send("Such shortURL is not found");
+    
+  }
+
   const userID = req.cookies["user_id"]
   const user = users[userID];
   const templateVars = { 
     // username: req.cookies["username"],
     user,
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL 
+    shortURL: shortURL, 
+    longURL: urlDatabase[shortURL].longURL 
   };
   res.render("urls_show", templateVars);
 });
@@ -109,6 +115,7 @@ app.post("/urls", (req, res) => {
 
 // Update long link
 app.post("/urls/:shortURL", (req, res) => {
+
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   // const newLongURL = req.body.longURL;
@@ -121,6 +128,13 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // Redirecting to long URL 
 app.get("/u/:shortURL", (req, res) => {
+
+  const shortURL = req.params.shortURL;
+  if (!findShortUrlInUrlDatabase(shortURL)) {
+    return res.status(403).send("Such shortURL is not found");
+    
+  }
+  
   const longURL = urlDatabase[req.params.shortURL].longURL;
   // console.log(longURL);
   res.redirect(longURL);
@@ -237,6 +251,17 @@ function findUserByEmail(email) {
     }
   }
   return null;
+};
+
+function findShortUrlInUrlDatabase(shortURL) {
+  let urlDatabaseKeys = Object.keys(urlDatabase);
+  for(let urlToCheck of urlDatabaseKeys) {
+    console.log(urlToCheck);
+    if(urlToCheck === shortURL) {
+      return true;
+    }
+  }
+  return false;
 };
 
 app.listen(PORT, () => {
