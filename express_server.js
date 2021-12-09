@@ -154,6 +154,17 @@ app.post('/register', (req, res) => {
   let userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+
+  if (!email || !password) {
+    return res.status(400).send("E-mail and password cannot be blank");
+  }
+
+  const user = findUserByEmail(email);
+
+  if(user) {
+    return res.status(400).send("User with such e-mail already exists")
+  }
+
   users[userID] = {
     id: userID,
     email: email,
@@ -164,11 +175,22 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
+// Helper functions
 // Random string generator
 function generateRandomString() {
   let randomString =  Math.random().toString(36).replace(/\W+/, '').substr(0, 6);
   return randomString;
-}
+};
+
+function findUserByEmail(email) {
+  for(let userID in users) {
+    let user = users[userID];
+    if(user.email === email) {
+      return user;
+    }
+  }
+  return null;
+};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
