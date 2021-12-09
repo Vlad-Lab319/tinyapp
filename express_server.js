@@ -43,8 +43,12 @@ app.get("/", (req, res) => {
 
 // Add new links pair
 app.get("/urls/new", (req, res) => {
+  const userID = req.cookies["user_id"]
+  const user = users[userID];
+  console.log('New page user object:', user);
   const templateVars = {
     username: req.cookies["username"],
+    user,
     // ... any other vars
   };
   res.render("urls_new", templateVars);
@@ -52,8 +56,11 @@ app.get("/urls/new", (req, res) => {
 
 // Display all links pairs
 app.get("/urls", (req, res) => {
+  const userID = req.cookies["user_id"]
+  const user = users[userID];
   const templateVars = { 
     username: req.cookies["username"],
+    user,
     urls: urlDatabase 
   };
   res.render("urls_index", templateVars);
@@ -61,8 +68,11 @@ app.get("/urls", (req, res) => {
 
 // Show certain pair details
 app.get("/urls/:shortURL", (req, res) => {
+  const userID = req.cookies["user_id"]
+  const user = users[userID];
   const templateVars = { 
     username: req.cookies["username"],
+    user,
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL] 
   };
@@ -119,14 +129,20 @@ app.post("/logout", (req, res) => {
   // const cookies = req.body.username;
 
   res.clearCookie('username');
+  res.clearCookie('user_id');
+
   // console.log('Cookies: ', cookies);
   res.redirect(`/urls/`);
 });
 
 // Register endpoint
 app.get('/register', (req, res) => {
+  const userID = req.cookies["user_id"]
+  const user = users[userID];
   const templateVars = {
     username: req.cookies["username"],
+    user
+
     // ... any other vars
   };
   res.render('user_reg', templateVars);
