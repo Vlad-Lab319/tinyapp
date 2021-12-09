@@ -149,6 +149,13 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Delete from database
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const userID = req.cookies["user_id"]
+  const user = users[userID];
+
+  if(!user) {
+    return res.status(403).send("Only registred users can delete urls!");
+  }
+
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
