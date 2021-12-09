@@ -123,6 +123,13 @@ app.post("/urls", (req, res) => {
 // Update long link
 app.post("/urls/:shortURL", (req, res) => {
 
+  const userID = req.cookies["user_id"]
+  const user = users[userID];
+
+  if(!user) {
+    return res.status(403).send("Only registred users can edit urls!");
+  }
+
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   // const newLongURL = req.body.longURL;
