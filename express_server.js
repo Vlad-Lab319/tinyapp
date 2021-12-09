@@ -61,7 +61,6 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     // username: req.cookies["username"],
     user,
-    // ... any other vars
   };
   res.render("urls_new", templateVars);
 });
@@ -69,16 +68,19 @@ app.get("/urls/new", (req, res) => {
 // Display all links pairs
 app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
-  // if (!userID) {
-  //   // return res.status(403).send("Login please!");
-  //   res.redirect('/login');
-  //   return null;
-  // }
+  if (!userID) {
+    // return res.status(403).send("Login please!");
+    res.redirect('/login');
+    return null;
+  }
   const user = users[userID];
+  const urlsToDisplay = urlsForUser(userID);
+  console.log('Filtered urls: ', urlsToDisplay);
   const templateVars = { 
     // username: req.cookies["username"],
     user,
-    urls: urlDatabase 
+    // urls: urlDatabase 
+    urls: urlsToDisplay
   };
   res.render("urls_index", templateVars);
 });
@@ -259,12 +261,30 @@ function findUserByEmail(email) {
 function findShortUrlInUrlDatabase(shortURL) {
   let urlDatabaseKeys = Object.keys(urlDatabase);
   for(let urlToCheck of urlDatabaseKeys) {
-    console.log(urlToCheck);
+    // console.log('urlToCheck: ', urlToCheck);
     if(urlToCheck === shortURL) {
       return true;
     }
   }
   return false;
+};
+
+function urlsForUser(id) {
+  let urlsToDisplay = {};
+  let urlDatabaseKeys = Object.keys(urlDatabase);
+  console.log('URLs for user database keys: ', urlDatabaseKeys, 'id: ', id);
+  for(let url of urlDatabaseKeys) {
+    
+    if(urlDatabase[url].userID === id) {
+      console.log('urlDatabase[url].userID: ', urlDatabase[url].userID);
+      urlsToDisplay[url] = {
+        longURL: urlDatabase[url].longURL,
+        userID: urlDatabase[url].userID
+      }
+    }
+  }
+  console.log('Return from urlsForUser: ', urlsToDisplay);
+  return urlsToDisplay;
 };
 
 app.listen(PORT, () => {
