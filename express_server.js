@@ -172,12 +172,12 @@ app.post("/login", (req, res) => {
 
   const email = req.body.email;
   
-  const user = findUserByEmail(email);
+  const user = findUserByEmail(email, users);
   
   if (!user) {
     return res.status(403).send("User with such e-mail is not found");
   }
-  
+
   const password = req.body.password;
   const checkPassword = bcrypt.compareSync(password, user.password);
 
@@ -185,24 +185,13 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Password does not mutch");
   }
 
-  // const cookies = user.id;
-
-  // res.cookie('user_id', `${cookies}`);
-
   req.session.user_id = user.id;
-  // console.log('Cookies: ', cookies);
   res.redirect('/urls/');
 });
 
 // Logout view endpoint
 app.post("/logout", (req, res) => {
-  // const cookies = req.body.username;
-
-  // res.clearCookie('username');
-  // res.clearCookie('user_id');
   delete req.session.user_id;
-
-  // console.log('Cookies: ', cookies);
   res.redirect('/urls/');
 });
 
@@ -211,17 +200,13 @@ app.get('/register', (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
   const templateVars = {
-    // username: req.cookies["username"],
     user
-
-    // ... any other vars
   };
   res.render('user_reg', templateVars);
 });
 
 // POST / register endpoint
 app.post('/register', (req, res) => {
-  // console.log(req.body);  // Log the POST request body to the console
   let userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
@@ -230,7 +215,7 @@ app.post('/register', (req, res) => {
     return res.status(400).send("E-mail and password cannot be blank");
   }
 
-  const user = findUserByEmail(email);
+  const user = findUserByEmail(email, users);
 
   if(user) {
     return res.status(400).send("User with such e-mail already exists")
@@ -243,7 +228,6 @@ app.post('/register', (req, res) => {
     email: email,
     password: hashedPassword
   }
-  // res.cookie('user_id', userID);
   req.session.user_id = userID;
   console.log(users[userID]);
   res.redirect('/urls');
@@ -254,7 +238,6 @@ app.get('/login', (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
   const templateVars = {
-    // username: req.cookies["username"],
     user
   };
   res.render('user_login', templateVars);
@@ -268,20 +251,30 @@ function generateRandomString() {
   return randomString;
 };
 
-function findUserByEmail(email) {
-  for(let userID in users) {
-    let user = users[userID];
-    if(user.email === email) {
-      return user;
+// function findUserByEmail(email) {
+//   for(let userID in users) {
+//     let user = users[userID];
+//     if(user.email === email) {
+//       return user;
+//     }
+//   }
+//   return null;
+// };
+
+const  findUserByEmail = function(email, database) {
+    for(let userID in database) {
+      let user = users[userID];
+      if(user.email === email) {
+        return user;
+      }
     }
-  }
-  return null;
-};
+    return null;
+  };
+
 
 function findShortUrlInUrlDatabase(shortURL) {
   let urlDatabaseKeys = Object.keys(urlDatabase);
   for(let urlToCheck of urlDatabaseKeys) {
-    // console.log('urlToCheck: ', urlToCheck);
     if(urlToCheck === shortURL) {
       return true;
     }
