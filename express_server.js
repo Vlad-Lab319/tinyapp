@@ -4,9 +4,18 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
+const cookieSession = require('cookie-session');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+
+// Makes cookie readable / parses
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["Some funny stuff to test this feature", "booobooobooo"],
+  })
+);
 
 app.set("view engine", "ejs");
 
@@ -36,21 +45,9 @@ const users = {
   }
 }
 
-
-// app.get("/", (req, res) => {
-//   // Cookies that have not been signed
-//   console.log('Cookies: ', req.cookies);
-
-//   // Cookies that have been signed
-//   console.log('Signed Cookies: ', req.signedCookies);
-
-//   res.send("Hello!");
-// });
-
-
 // Add new links pair view endpoint
 app.get("/urls/new", (req, res) => {
-  const userID = req.cookies["user_id"]
+  const userID = req.session.user_id;
   const user = users[userID];
   // console.log('New page user object:', user);
 
@@ -68,7 +65,7 @@ app.get("/urls/new", (req, res) => {
 
 // Display all links pairs
 app.get("/urls", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   if (!userID) {
     // return res.status(403).send("Login please!");
     res.redirect('/login');
@@ -94,7 +91,7 @@ app.get("/urls/:shortURL", (req, res) => {
     
   }
 
-  const userID = req.cookies["user_id"]
+  const userID = req.session.user_id;
   const user = users[userID];
   const templateVars = { 
     // username: req.cookies["username"],
@@ -108,7 +105,7 @@ app.get("/urls/:shortURL", (req, res) => {
 // Add new set of links 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   let shortURLGenerated = generateRandomString();
   console.log(shortURLGenerated);
   urlDatabase[shortURLGenerated] = {
@@ -124,7 +121,7 @@ app.post("/urls", (req, res) => {
 // Update long link
 app.post("/urls/:shortURL", (req, res) => {
 
-  const userID = req.cookies["user_id"]
+  const userID = req.session.user_id;
   const user = users[userID];
 
   if(!user) {
@@ -157,7 +154,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Delete from database
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const userID = req.cookies["user_id"]
+  const userID = req.session.user_id;
   const user = users[userID];
 
   if(!user) {
@@ -174,26 +171,27 @@ app.post("/login", (req, res) => {
   console.log('Login req body: ', req.body);  // Log the POST request body to the console
 
   const email = req.body.email;
-  const password = req.body.password;
   
   const user = findUserByEmail(email);
-
-  const checkPassword = bcrypt.compareSync(password, user.password);
-  
   
   if (!user) {
     return res.status(403).send("User with such e-mail is not found");
   }
+  
+  const password = req.body.password;
+  const checkPassword = bcrypt.compareSync(password, user.password);
 
   if(!checkPassword) {
     return res.status(403).send("Password does not mutch");
   }
 
-  const cookies = user.id;
+  // const cookies = user.id;
 
-  res.cookie('user_id', `${cookies}`);
-  console.log('Cookies: ', cookies);
-  res.redirect(`/urls/`);
+  // res.cookie('user_id', `${cookies}`);
+
+  req.session.user_id = user.id;
+  // console.log('Cookies: ', cookies);
+  res.redirect('/urls/');
 });
 
 // Logout view endpoint
@@ -201,15 +199,16 @@ app.post("/logout", (req, res) => {
   // const cookies = req.body.username;
 
   // res.clearCookie('username');
-  res.clearCookie('user_id');
+  // res.clearCookie('user_id');
+  delete req.session.user_id;
 
   // console.log('Cookies: ', cookies);
-  res.redirect(`/urls/`);
+  res.redirect('/urls/');
 });
 
 // Register endpoint
 app.get('/register', (req, res) => {
-  const userID = req.cookies["user_id"]
+  const userID = req.session.user_id;
   const user = users[userID];
   const templateVars = {
     // username: req.cookies["username"],
@@ -244,14 +243,15 @@ app.post('/register', (req, res) => {
     email: email,
     password: hashedPassword
   }
-  res.cookie('user_id', userID);
+  // res.cookie('user_id', userID);
+  req.session.user_id = userID;
   console.log(users[userID]);
   res.redirect('/urls');
 });
 
 // Login view endpoint
 app.get('/login', (req, res) => {
-  const userID = req.cookies["user_id"]
+  const userID = req.session.user_id;
   const user = users[userID];
   const templateVars = {
     // username: req.cookies["username"],
