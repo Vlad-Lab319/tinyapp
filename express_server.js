@@ -47,7 +47,7 @@ app.get("/urls/new", (req, res) => {
   const user = users[userID];
   console.log('New page user object:', user);
   const templateVars = {
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
     user,
     // ... any other vars
   };
@@ -59,7 +59,7 @@ app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"]
   const user = users[userID];
   const templateVars = { 
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
     user,
     urls: urlDatabase 
   };
@@ -71,7 +71,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const userID = req.cookies["user_id"]
   const user = users[userID];
   const templateVars = { 
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
     user,
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL] 
@@ -114,17 +114,31 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-// Login feature
+// POST / Login endpoint
 app.post("/login", (req, res) => {
   console.log('Login req body: ', req.body);  // Log the POST request body to the console
-  const cookies = req.body.username;
 
-  res.cookie('username', `${cookies}`);
+  const email = req.body.email;
+  const password = req.body.password;
+  
+  const user = findUserByEmail(email);
+  
+  if (!user) {
+    return res.status(403).send("User with such e-mail is not found");
+  }
+
+  if(user.password !== password) {
+    return res.status(403).send("Password does not mutch");
+  }
+
+  const cookies = user.id;
+
+  res.cookie('user_id', `${cookies}`);
   console.log('Cookies: ', cookies);
   res.redirect(`/urls/`);
 });
 
-// Logout endpoint
+// Logout view endpoint
 app.post("/logout", (req, res) => {
   // const cookies = req.body.username;
 
@@ -150,7 +164,7 @@ app.get('/register', (req, res) => {
 
 // POST / register endpoint
 app.post('/register', (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
+  // console.log(req.body);  // Log the POST request body to the console
   let userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
@@ -180,7 +194,7 @@ app.get('/login', (req, res) => {
   const userID = req.cookies["user_id"]
   const user = users[userID];
   const templateVars = {
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
     user
 
     // ... any other vars
@@ -209,12 +223,3 @@ function findUserByEmail(email) {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-
-
-// const templateVars = {
-//   username: req.cookies["username"],
-//   // ... any other vars
-// };
-// res.render("urls_index", templateVars);
