@@ -49,6 +49,7 @@ app.get("/urls/new", (req, res) => {
 
   if(!user) {
     res.redirect('/login');
+    return null;
   }
 
   const templateVars = {
@@ -147,7 +148,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   // const cookies = req.body.username;
 
-  res.clearCookie('username');
+  // res.clearCookie('username');
   res.clearCookie('user_id');
 
   // console.log('Cookies: ', cookies);
@@ -159,7 +160,7 @@ app.get('/register', (req, res) => {
   const userID = req.cookies["user_id"]
   const user = users[userID];
   const templateVars = {
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
     user
 
     // ... any other vars
