@@ -175,6 +175,20 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
+// Login view endpoint
+app.get('/login', (req, res) => {
+  const userID = req.cookies["user_id"]
+  const user = users[userID];
+  const templateVars = {
+    username: req.cookies["username"],
+    user
+
+    // ... any other vars
+  };
+  res.render('user_login', templateVars);
+});
+
+
 // Helper functions
 // Random string generator
 function generateRandomString() {
