@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
+const { findUserByEmail } = require('./helpers');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -261,15 +262,7 @@ function generateRandomString() {
 //   return null;
 // };
 
-const  findUserByEmail = function(email, database) {
-    for(let userID in database) {
-      let user = users[userID];
-      if(user.email === email) {
-        return user;
-      }
-    }
-    return null;
-  };
+
 
 
 function findShortUrlInUrlDatabase(shortURL) {
