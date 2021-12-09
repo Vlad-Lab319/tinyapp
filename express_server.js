@@ -94,11 +94,15 @@ app.get("/urls/:shortURL", (req, res) => {
 // Add new set of links 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
+  const userID = req.cookies['user_id'];
   let shortURLGenerated = generateRandomString();
   console.log(shortURLGenerated);
   urlDatabase[shortURLGenerated] = {
-    longURL: req.body.longURL
+    longURL: req.body.longURL,
+    userID: userID
   };
+
+  console.log(urlDatabase);
 
   res.redirect(`/urls/${shortURLGenerated}`);
 });
