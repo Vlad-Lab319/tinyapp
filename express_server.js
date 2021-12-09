@@ -68,7 +68,12 @@ app.get("/urls/new", (req, res) => {
 
 // Display all links pairs
 app.get("/urls", (req, res) => {
-  const userID = req.cookies["user_id"]
+  const userID = req.cookies["user_id"];
+  // if (!userID) {
+  //   // return res.status(403).send("Login please!");
+  //   res.redirect('/login');
+  //   return null;
+  // }
   const user = users[userID];
   const templateVars = { 
     // username: req.cookies["username"],
@@ -229,8 +234,6 @@ app.get('/login', (req, res) => {
   const templateVars = {
     // username: req.cookies["username"],
     user
-
-    // ... any other vars
   };
   res.render('user_login', templateVars);
 });

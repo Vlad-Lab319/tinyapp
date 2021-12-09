@@ -20,6 +20,13 @@
         </tr>
       </thead>
       <tbody>
+        <% if(!user) { %>
+          <div>
+            <p>
+              You need to login to see your urls!
+            </p> 
+          </div>
+        <% } else {%>
         <% for(let url in urls) { %>
           <tr>
             <td><a href='/urls/<%= url %>'></ahref><%= url %></a></td>
@@ -28,7 +35,7 @@
             <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit">Delete</button></form></td>
 
           </tr>
-        <% } %>
+        <% }} %>
       </tbody>
     </table>
   </main>
