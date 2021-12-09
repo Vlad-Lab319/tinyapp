@@ -45,7 +45,12 @@ app.get("/", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const userID = req.cookies["user_id"]
   const user = users[userID];
-  console.log('New page user object:', user);
+  // console.log('New page user object:', user);
+
+  if(!user) {
+    res.redirect('/login');
+  }
+
   const templateVars = {
     // username: req.cookies["username"],
     user,
