@@ -11,8 +11,14 @@ app.set("view engine", "ejs");
 
 // Dummy links database
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "aJ48lW"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "aJ48lW"
+  }
 };
 
 // Dummy users database
@@ -41,7 +47,7 @@ app.get("/", (req, res) => {
 });
 
 
-// Add new links pair
+// Add new links pair view endpoint
 app.get("/urls/new", (req, res) => {
   const userID = req.cookies["user_id"]
   const user = users[userID];
@@ -80,7 +86,7 @@ app.get("/urls/:shortURL", (req, res) => {
     // username: req.cookies["username"],
     user,
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL] 
+    longURL: urlDatabase[req.params.shortURL].longURL 
   };
   res.render("urls_show", templateVars);
 });
@@ -90,7 +96,10 @@ app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   let shortURLGenerated = generateRandomString();
   console.log(shortURLGenerated);
-  urlDatabase[shortURLGenerated] = req.body.longURL;
+  urlDatabase[shortURLGenerated] = {
+    longURL: req.body.longURL
+  };
+
   res.redirect(`/urls/${shortURLGenerated}`);
 });
 
@@ -99,7 +108,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   // const newLongURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL].longURL = longURL;
   console.log(urlDatabase);
 
   res.redirect('/urls');
