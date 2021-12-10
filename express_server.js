@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 const { findUserByEmail } = require('./helpers');
+const { urlDatabase, users } = require('./data/dummyData');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -20,31 +21,31 @@ app.use(
 
 app.set("view engine", "ejs");
 
-// Dummy links database
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "aJ48lW"
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "aJ48lW"
-  }
-};
+// // Dummy links database
+// const urlDatabase = {
+//   "b2xVn2": {
+//     longURL: "http://www.lighthouselabs.ca",
+//     userID: "aJ48lW"
+//   },
+//   "9sm5xK": {
+//     longURL: "http://www.google.com",
+//     userID: "aJ48lW"
+//   }
+// };
 
-// Dummy users database
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
+// // Dummy users database
+// const users = {
+//   "userRandomID": {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur"
+//   },
+//   "user2RandomID": {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk"
+//   }
+// };
 
 // Main page redirections
 app.get("/", (req, res) => {
