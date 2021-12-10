@@ -46,11 +46,22 @@ const users = {
   }
 };
 
+// Main page redirections
+app.get("/", (req, res) => {
+  const userID = req.session.userId;
+  const user = users[userID];
+
+  if (!user) {
+    return res.redirect('/login');
+  }
+  
+  return res.redirect('/urls');
+});
+
 // Add new links pair view endpoint
 app.get("/urls/new", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userId;
   const user = users[userID];
-  // console.log('New page user object:', user);
 
   if (!user) {
     res.redirect('/login');
@@ -64,21 +75,15 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-// Display all links pairs
+// Display all links pairs in user's account
 app.get("/urls", (req, res) => {
-  const userID = req.session.user_id;
-  if (!userID) {
-    // return res.status(403).send("Login please!");
-    res.redirect('/login');
-    return null;
-  }
+  const userID = req.session.userId;
   const user = users[userID];
+
   const urlsToDisplay = urlsForUser(userID);
   console.log('Filtered urls: ', urlsToDisplay);
   const templateVars = {
-    // username: req.cookies["username"],
     user,
-    // urls: urlDatabase
     urls: urlsToDisplay
   };
   res.render("urls_index", templateVars);
@@ -87,26 +92,37 @@ app.get("/urls", (req, res) => {
 // Show certain pair details
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  const userID = req.session.userId;
+  const user = users[userID];
+
+  if (!user) {
+    return res.redirect('/urls');
+  }
+
   if (!findShortUrlInUrlDatabase(shortURL)) {
-    return res.status(403).send("Such shortURL is not found");
+    return res.status(403).send("Such shortURL is not found in your account");
     
   }
 
-  const userID = req.session.user_id;
-  const user = users[userID];
   const templateVars = {
-    // username: req.cookies["username"],
     user,
     shortURL: shortURL,
     longURL: urlDatabase[shortURL].longURL
   };
+
+
   res.render("urls_show", templateVars);
 });
 
 // Add new set of links
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  const userID = req.session.user_id;
+  const userID = req.session.userId;
+  const user = users[userID];
+
+  if (!user) {
+    return res.status(403).send("Only registred users can create short urls!");
+  }
+
   let shortURLGenerated = generateRandomString();
   console.log(shortURLGenerated);
   urlDatabase[shortURLGenerated] = {
@@ -114,15 +130,13 @@ app.post("/urls", (req, res) => {
     userID: userID
   };
 
-  console.log(urlDatabase);
-
   res.redirect(`/urls/${shortURLGenerated}`);
 });
 
 // Update long link
 app.post("/urls/:shortURL", (req, res) => {
 
-  const userID = req.session.user_id;
+  const userID = req.session.userId;
   const user = users[userID];
 
   if (!user) {
@@ -130,8 +144,13 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 
   const shortURL = req.params.shortURL;
+
+  if (userID !== urlDatabase[shortURL].userID) {
+    console.log ('Logged User ID: ', userID, 'Database for shortURL ID: ', urlDatabase[shortURL].id)
+    return res.status(403).send("Users can edit only their own urls!");
+  }
+
   const longURL = req.body.longURL;
-  // const newLongURL = req.body.longURL;
   urlDatabase[shortURL].longURL = longURL;
   console.log(urlDatabase);
 
@@ -149,13 +168,12 @@ app.get("/u/:shortURL", (req, res) => {
   }
   
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  // console.log(longURL);
   res.redirect(longURL);
 });
 
 // Delete from database
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userId;
   const user = users[userID];
 
   if (!user) {
@@ -163,6 +181,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 
   const shortURL = req.params.shortURL;
+
+  if (userID !== urlDatabase[shortURL].userID) {
+    console.log ('Logged User ID: ', userID, 'Database for shortURL ID: ', urlDatabase[shortURL].id)
+    return res.status(403).send("Users can delete only their own urls!");
+  }
+
   delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
@@ -186,20 +210,26 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Password does not mutch");
   }
 
-  req.session.user_id = user.id;
+  req.session.userId = user.id;
   res.redirect('/urls/');
 });
 
 // Logout view endpoint
 app.post("/logout", (req, res) => {
-  delete req.session.user_id;
+  delete req.session.userId;
   res.redirect('/urls/');
 });
 
 // Register endpoint
 app.get('/register', (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userId;
   const user = users[userID];
+
+  if (user) {
+    
+    return res.redirect('/urls');
+  }
+
   const templateVars = {
     user
   };
@@ -229,15 +259,21 @@ app.post('/register', (req, res) => {
     email: email,
     password: hashedPassword
   };
-  req.session.user_id = userID;
+  req.session.userId = userID;
   console.log(users[userID]);
   res.redirect('/urls');
 });
 
 // Login view endpoint
 app.get('/login', (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.session.userId;
   const user = users[userID];
+
+  if (user) {
+    
+    return res.redirect('/urls');
+  }
+
   const templateVars = {
     user
   };

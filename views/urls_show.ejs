@@ -11,6 +11,10 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
+        <% if (!shortURL) { %>
+        <h5>Such shorten url is not found</h5>
+        <% } else { %>
+
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p> <!-- Link ??? -->
         <h5 class="card-title">Edit</h5>
@@ -19,6 +23,7 @@
           <input type="text" name="longURL" value="<%= longURL %>">
           <button type="submit">Submit</button>
         </form>
+        <% } %>
       </div>
     <div class="card-footer text-muted"></div>
   </div>
