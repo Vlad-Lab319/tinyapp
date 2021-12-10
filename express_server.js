@@ -65,7 +65,7 @@ app.get("/urls/new", (req, res) => {
   }
 
   const templateVars = {
-    user,
+    user
   };
   res.render("urls_new", templateVars);
 });
@@ -82,7 +82,6 @@ app.get("/urls/:shortURL", (req, res) => {
 
   if (!findShortUrlInUrlDatabase(shortURL, urlDatabase)) {
     return res.status(403).send("Such shortURL is not found in your account");
-    
   }
 
   const templateVars = {
@@ -91,11 +90,8 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[shortURL].longURL
   };
 
-
   res.render("urls_show", templateVars);
 });
-
-
 
 // Add new set of links
 app.post("/urls", (req, res) => {
@@ -136,7 +132,6 @@ app.post("/urls/:shortURL", (req, res) => {
 
   res.redirect('/urls');
 });
-
 
 // Redirecting to long URL
 app.get("/u/:shortURL", (req, res) => {
@@ -180,7 +175,6 @@ app.get('/login', (req, res) => {
   const user = users[userID];
 
   if (user) {
-    
     return res.redirect('/urls');
   }
 
@@ -228,7 +222,6 @@ app.get('/register', (req, res) => {
   const user = users[userID];
 
   if (user) {
-    
     return res.redirect('/urls');
   }
 
