@@ -81,7 +81,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 
   if (!findShortUrlInUrlDatabase(shortURL, urlDatabase)) {
-    return res.status(403).send("Such shortURL is not found in your account");
+    return res.status(404).send("Such shortURL is not found in your account");
   }
 
   const templateVars = {
@@ -138,7 +138,7 @@ app.get("/u/:shortURL", (req, res) => {
 
   const shortURL = req.params.shortURL;
   if (!findShortUrlInUrlDatabase(shortURL, urlDatabase)) {
-    return res.status(403).send("Such shortURL is not found");
+    return res.status(404).send("Such shortURL is not found");
     
   }
   
@@ -198,7 +198,7 @@ app.post("/login", (req, res) => {
   const user = findUserByEmail(email, users);
   
   if (!user) {
-    return res.status(403).send("User with such e-mail is not found");
+    return res.status(404).send("User with such e-mail is not found");
   }
 
   const password = req.body.password;
@@ -244,7 +244,7 @@ app.post('/register', (req, res) => {
   const user = findUserByEmail(email, users);
 
   if (user) {
-    return res.status(400).send("User with such e-mail already exists");
+    return res.status(403).send("User with such e-mail already exists");
   }
 
   const hashedPassword = bcrypt.hashSync(password, 10);
