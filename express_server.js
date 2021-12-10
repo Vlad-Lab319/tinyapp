@@ -5,12 +5,18 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
-const { findUserByEmail } = require('./helpers');
+const { findUserByEmail, generateRandomString, findShortUrlInUrlDatabase, urlsForUser } = require('./helpers');
 const { urlDatabase, users } = require('./data/dummyData');
+
+
+app.set("view engine", "ejs");
+
+/*
+// Middleware
+*/
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-
 // Makes cookie readable / parses
 app.use(
   cookieSession({
@@ -19,33 +25,9 @@ app.use(
   })
 );
 
-app.set("view engine", "ejs");
-
-// // Dummy links database
-// const urlDatabase = {
-//   "b2xVn2": {
-//     longURL: "http://www.lighthouselabs.ca",
-//     userID: "aJ48lW"
-//   },
-//   "9sm5xK": {
-//     longURL: "http://www.google.com",
-//     userID: "aJ48lW"
-//   }
-// };
-
-// // Dummy users database
-// const users = {
-//   "userRandomID": {
-//     id: "userRandomID",
-//     email: "user@example.com",
-//     password: "purple-monkey-dinosaur"
-//   },
-//   "user2RandomID": {
-//     id: "user2RandomID",
-//     email: "user2@example.com",
-//     password: "dishwasher-funk"
-//   }
-// };
+/*
+// General routes
+*/
 
 // Main page redirections
 app.get("/", (req, res) => {
@@ -59,7 +41,20 @@ app.get("/", (req, res) => {
   return res.redirect('/urls');
 });
 
-// Add new links pair view endpoint
+// Display all links pairs in user's account
+app.get("/urls", (req, res) => {
+  const userID = req.session.userId;
+  const user = users[userID];
+
+  const urlsToDisplay = urlsForUser(userID, urlDatabase);
+  const templateVars = {
+    user,
+    urls: urlsToDisplay
+  };
+  res.render("urls_index", templateVars);
+});
+
+// New links pair form
 app.get("/urls/new", (req, res) => {
   const userID = req.session.userId;
   const user = users[userID];
@@ -70,23 +65,9 @@ app.get("/urls/new", (req, res) => {
   }
 
   const templateVars = {
-    // username: req.cookies["username"],
     user,
   };
   res.render("urls_new", templateVars);
-});
-
-// Display all links pairs in user's account
-app.get("/urls", (req, res) => {
-  const userID = req.session.userId;
-  const user = users[userID];
-
-  const urlsToDisplay = urlsForUser(userID);
-  const templateVars = {
-    user,
-    urls: urlsToDisplay
-  };
-  res.render("urls_index", templateVars);
 });
 
 // Show certain pair details
@@ -99,7 +80,7 @@ app.get("/urls/:shortURL", (req, res) => {
     return res.redirect('/urls');
   }
 
-  if (!findShortUrlInUrlDatabase(shortURL)) {
+  if (!findShortUrlInUrlDatabase(shortURL, urlDatabase)) {
     return res.status(403).send("Such shortURL is not found in your account");
     
   }
@@ -113,6 +94,8 @@ app.get("/urls/:shortURL", (req, res) => {
 
   res.render("urls_show", templateVars);
 });
+
+
 
 // Add new set of links
 app.post("/urls", (req, res) => {
@@ -159,7 +142,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
 
   const shortURL = req.params.shortURL;
-  if (!findShortUrlInUrlDatabase(shortURL)) {
+  if (!findShortUrlInUrlDatabase(shortURL, urlDatabase)) {
     return res.status(403).send("Such shortURL is not found");
     
   }
@@ -187,7 +170,33 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-// POST / Login endpoint
+/*
+// LOGIN / LOGOUT
+*/
+
+// Login form
+app.get('/login', (req, res) => {
+  const userID = req.session.userId;
+  const user = users[userID];
+
+  if (user) {
+    
+    return res.redirect('/urls');
+  }
+
+  const templateVars = {
+    user
+  };
+  res.render('user_login', templateVars);
+});
+
+// Logout 
+app.post("/logout", (req, res) => {
+  delete req.session.userId;
+  res.redirect('/urls/');
+});
+
+// POST / Login 
 app.post("/login", (req, res) => {
 
   const email = req.body.email;
@@ -209,13 +218,11 @@ app.post("/login", (req, res) => {
   res.redirect('/urls/');
 });
 
-// Logout view endpoint
-app.post("/logout", (req, res) => {
-  delete req.session.userId;
-  res.redirect('/urls/');
-});
+/*
+// REGISTER
+*/
 
-// Register endpoint
+// Register form
 app.get('/register', (req, res) => {
   const userID = req.session.userId;
   const user = users[userID];
@@ -231,7 +238,7 @@ app.get('/register', (req, res) => {
   res.render('user_reg', templateVars);
 });
 
-// POST / register endpoint
+// POST / register 
 app.post('/register', (req, res) => {
   let userID = generateRandomString();
   const email = req.body.email;
@@ -258,55 +265,6 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-// Login view endpoint
-app.get('/login', (req, res) => {
-  const userID = req.session.userId;
-  const user = users[userID];
-
-  if (user) {
-    
-    return res.redirect('/urls');
-  }
-
-  const templateVars = {
-    user
-  };
-  res.render('user_login', templateVars);
-});
-
-
-// Helper functions
-// Random string generator
-function generateRandomString() {
-  let randomString =  Math.random().toString(36).replace(/\W+/, '').substr(0, 6);
-  return randomString;
-}
-
-function findShortUrlInUrlDatabase(shortURL) {
-  let urlDatabaseKeys = Object.keys(urlDatabase);
-  for (let urlToCheck of urlDatabaseKeys) {
-    if (urlToCheck === shortURL) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function urlsForUser(id) {
-  let urlsToDisplay = {};
-  let urlDatabaseKeys = Object.keys(urlDatabase);
-  for (let url of urlDatabaseKeys) {
-    
-    if (urlDatabase[url].userID === id) {
-      urlsToDisplay[url] = {
-        longURL: urlDatabase[url].longURL,
-        userID: urlDatabase[url].userID
-      };
-    }
-  }
-  return urlsToDisplay;
-}
-
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tinny app is listening on port ${PORT}!`);
 });
