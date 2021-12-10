@@ -33,18 +33,18 @@ const urlDatabase = {
 };
 
 // Dummy users database
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 // Add new links pair view endpoint
 app.get("/urls/new", (req, res) => {
@@ -52,7 +52,7 @@ app.get("/urls/new", (req, res) => {
   const user = users[userID];
   // console.log('New page user object:', user);
 
-  if(!user) {
+  if (!user) {
     res.redirect('/login');
     return null;
   }
@@ -75,10 +75,10 @@ app.get("/urls", (req, res) => {
   const user = users[userID];
   const urlsToDisplay = urlsForUser(userID);
   console.log('Filtered urls: ', urlsToDisplay);
-  const templateVars = { 
+  const templateVars = {
     // username: req.cookies["username"],
     user,
-    // urls: urlDatabase 
+    // urls: urlDatabase
     urls: urlsToDisplay
   };
   res.render("urls_index", templateVars);
@@ -94,16 +94,16 @@ app.get("/urls/:shortURL", (req, res) => {
 
   const userID = req.session.user_id;
   const user = users[userID];
-  const templateVars = { 
+  const templateVars = {
     // username: req.cookies["username"],
     user,
-    shortURL: shortURL, 
-    longURL: urlDatabase[shortURL].longURL 
+    shortURL: shortURL,
+    longURL: urlDatabase[shortURL].longURL
   };
   res.render("urls_show", templateVars);
 });
 
-// Add new set of links 
+// Add new set of links
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   const userID = req.session.user_id;
@@ -125,7 +125,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
 
-  if(!user) {
+  if (!user) {
     return res.status(403).send("Only registred users can edit urls!");
   }
 
@@ -139,7 +139,7 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 
-// Redirecting to long URL 
+// Redirecting to long URL
 app.get("/u/:shortURL", (req, res) => {
 
   const shortURL = req.params.shortURL;
@@ -158,7 +158,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
 
-  if(!user) {
+  if (!user) {
     return res.status(403).send("Only registred users can delete urls!");
   }
 
@@ -182,7 +182,7 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   const checkPassword = bcrypt.compareSync(password, user.password);
 
-  if(!checkPassword) {
+  if (!checkPassword) {
     return res.status(403).send("Password does not mutch");
   }
 
@@ -218,8 +218,8 @@ app.post('/register', (req, res) => {
 
   const user = findUserByEmail(email, users);
 
-  if(user) {
-    return res.status(400).send("User with such e-mail already exists")
+  if (user) {
+    return res.status(400).send("User with such e-mail already exists");
   }
 
   const hashedPassword = bcrypt.hashSync(password, 10);
@@ -228,7 +228,7 @@ app.post('/register', (req, res) => {
     id: userID,
     email: email,
     password: hashedPassword
-  }
+  };
   req.session.user_id = userID;
   console.log(users[userID]);
   res.redirect('/urls');
@@ -250,48 +250,35 @@ app.get('/login', (req, res) => {
 function generateRandomString() {
   let randomString =  Math.random().toString(36).replace(/\W+/, '').substr(0, 6);
   return randomString;
-};
-
-// function findUserByEmail(email) {
-//   for(let userID in users) {
-//     let user = users[userID];
-//     if(user.email === email) {
-//       return user;
-//     }
-//   }
-//   return null;
-// };
-
-
-
+}
 
 function findShortUrlInUrlDatabase(shortURL) {
   let urlDatabaseKeys = Object.keys(urlDatabase);
-  for(let urlToCheck of urlDatabaseKeys) {
-    if(urlToCheck === shortURL) {
+  for (let urlToCheck of urlDatabaseKeys) {
+    if (urlToCheck === shortURL) {
       return true;
     }
   }
   return false;
-};
+}
 
 function urlsForUser(id) {
   let urlsToDisplay = {};
   let urlDatabaseKeys = Object.keys(urlDatabase);
   console.log('URLs for user database keys: ', urlDatabaseKeys, 'id: ', id);
-  for(let url of urlDatabaseKeys) {
+  for (let url of urlDatabaseKeys) {
     
-    if(urlDatabase[url].userID === id) {
+    if (urlDatabase[url].userID === id) {
       console.log('urlDatabase[url].userID: ', urlDatabase[url].userID);
       urlsToDisplay[url] = {
         longURL: urlDatabase[url].longURL,
         userID: urlDatabase[url].userID
-      }
+      };
     }
   }
   console.log('Return from urlsForUser: ', urlsToDisplay);
   return urlsToDisplay;
-};
+}
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
