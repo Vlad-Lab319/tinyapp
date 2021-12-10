@@ -81,7 +81,6 @@ app.get("/urls", (req, res) => {
   const user = users[userID];
 
   const urlsToDisplay = urlsForUser(userID);
-  console.log('Filtered urls: ', urlsToDisplay);
   const templateVars = {
     user,
     urls: urlsToDisplay
@@ -124,7 +123,6 @@ app.post("/urls", (req, res) => {
   }
 
   let shortURLGenerated = generateRandomString();
-  console.log(shortURLGenerated);
   urlDatabase[shortURLGenerated] = {
     longURL: req.body.longURL,
     userID: userID
@@ -146,13 +144,11 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
 
   if (userID !== urlDatabase[shortURL].userID) {
-    console.log ('Logged User ID: ', userID, 'Database for shortURL ID: ', urlDatabase[shortURL].id)
     return res.status(403).send("Users can edit only their own urls!");
   }
 
   const longURL = req.body.longURL;
   urlDatabase[shortURL].longURL = longURL;
-  console.log(urlDatabase);
 
   res.redirect('/urls');
 });
@@ -183,7 +179,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
 
   if (userID !== urlDatabase[shortURL].userID) {
-    console.log ('Logged User ID: ', userID, 'Database for shortURL ID: ', urlDatabase[shortURL].id)
     return res.status(403).send("Users can delete only their own urls!");
   }
 
@@ -193,7 +188,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // POST / Login endpoint
 app.post("/login", (req, res) => {
-  console.log('Login req body: ', req.body);  // Log the POST request body to the console
 
   const email = req.body.email;
   
@@ -260,7 +254,6 @@ app.post('/register', (req, res) => {
     password: hashedPassword
   };
   req.session.userId = userID;
-  console.log(users[userID]);
   res.redirect('/urls');
 });
 
@@ -301,18 +294,15 @@ function findShortUrlInUrlDatabase(shortURL) {
 function urlsForUser(id) {
   let urlsToDisplay = {};
   let urlDatabaseKeys = Object.keys(urlDatabase);
-  console.log('URLs for user database keys: ', urlDatabaseKeys, 'id: ', id);
   for (let url of urlDatabaseKeys) {
     
     if (urlDatabase[url].userID === id) {
-      console.log('urlDatabase[url].userID: ', urlDatabase[url].userID);
       urlsToDisplay[url] = {
         longURL: urlDatabase[url].longURL,
         userID: urlDatabase[url].userID
       };
     }
   }
-  console.log('Return from urlsForUser: ', urlsToDisplay);
   return urlsToDisplay;
 }
 
