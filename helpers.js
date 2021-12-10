@@ -13,7 +13,7 @@ const  findUserByEmail = function(email, database) {
 const generateRandomString = function() {
   let randomString =  Math.random().toString(36).replace(/\W+/, '').substr(0, 6);
   return randomString;
-}
+};
 
 // Checks if such short URL exists
 const findShortUrlInUrlDatabase = function(shortURL, database) {
@@ -24,7 +24,7 @@ const findShortUrlInUrlDatabase = function(shortURL, database) {
     }
   }
   return false;
-}
+};
 
 // URLs for display selector
 const urlsForUser = function(id, database) {
@@ -40,6 +40,6 @@ const urlsForUser = function(id, database) {
     }
   }
   return urlsToDisplay;
-}
+};
 
 module.exports = { findUserByEmail, generateRandomString, findShortUrlInUrlDatabase, urlsForUser };

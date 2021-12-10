@@ -184,13 +184,13 @@ app.get('/login', (req, res) => {
   res.render('user_login', templateVars);
 });
 
-// Logout 
+// Logout
 app.post("/logout", (req, res) => {
   delete req.session.userId;
   res.redirect('/urls/');
 });
 
-// POST / Login 
+// POST / Login
 app.post("/login", (req, res) => {
 
   const email = req.body.email;
@@ -231,7 +231,7 @@ app.get('/register', (req, res) => {
   res.render('user_reg', templateVars);
 });
 
-// POST / register 
+// POST / register
 app.post('/register', (req, res) => {
   let userID = generateRandomString();
   const email = req.body.email;
