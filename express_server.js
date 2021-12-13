@@ -46,6 +46,10 @@ app.get("/urls", (req, res) => {
   const userID = req.session.userId;
   const user = users[userID];
 
+  if (!user) {
+    return res.status(403).send("You need to login to see short URLs!");
+  }
+
   const urlsToDisplay = urlsForUser(userID, urlDatabase);
   const templateVars = {
     user,
@@ -77,11 +81,15 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = users[userID];
 
   if (!user) {
-    return res.redirect('/urls');
+    return res.status(403).send("You need to login to see short URLs!");
+  }
+  
+  if (!findShortUrlInUrlDatabase(shortURL, urlDatabase)) {
+    return res.status(404).send("Such shortURL does not exist");
   }
 
-  if (!findShortUrlInUrlDatabase(shortURL, urlDatabase)) {
-    return res.status(404).send("Such shortURL is not found in your account");
+  if (userID !== urlDatabase[shortURL].userID) {
+    return res.status(403).send("Users can get access only to their own urls!");
   }
 
   const templateVars = {
