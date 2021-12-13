@@ -2,18 +2,13 @@
 const  findUserByEmail = function(email, database) {
   for (let userID in database) {
     let user = database[userID];
-    if (user.email === email) {
-      return user;
-    }
+    if (user.email === email) return user;
   }
   return null;
 };
 
 // Random string generator
-const generateRandomString = function() {
-  let randomString =  Math.random().toString(36).replace(/\W+/, '').substr(0, 6);
-  return randomString;
-};
+const generateRandomString = () => Math.random().toString(36).replace(/\W+/, '').substr(0, 6);
 
 // Checks if such short URL exists
 const findShortUrlInUrlDatabase = function(shortURL, database) {

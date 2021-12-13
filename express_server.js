@@ -86,7 +86,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
   const templateVars = {
     user,
-    shortURL: shortURL,
+    shortURL,
     longURL: urlDatabase[shortURL].longURL
   };
 
@@ -233,7 +233,7 @@ app.get('/register', (req, res) => {
 
 // POST / register
 app.post('/register', (req, res) => {
-  let userID = generateRandomString();
+  const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
 
