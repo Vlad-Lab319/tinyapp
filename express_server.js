@@ -186,7 +186,7 @@ app.get('/login', (req, res) => {
 
 // Logout
 app.post("/logout", (req, res) => {
-  delete req.session.userId;
+  req.session = null;
   res.redirect('/urls/');
 });
 
