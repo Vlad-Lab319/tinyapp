@@ -47,7 +47,11 @@ app.get("/urls", (req, res) => {
   const user = users[userID];
 
   if (!user) {
-    return res.status(403).send("You need to login to see short URLs!");
+    // return res.status(403).send(`You need to <a href="/login">login</a> to see short URLs!`);
+    const templateVars = {
+      user
+    };
+    return res.status(403).render("urls_index", templateVars);
   }
 
   const urlsToDisplay = urlsForUser(userID, urlDatabase);
@@ -81,7 +85,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = users[userID];
 
   if (!user) {
-    return res.status(403).send("You need to login to see short URLs!");
+    return res.status(403).send(`You need to <a href="/login">login</a> to see short URLs!`);
   }
   
   if (!findShortUrlInUrlDatabase(shortURL, urlDatabase)) {
@@ -107,7 +111,7 @@ app.post("/urls", (req, res) => {
   const user = users[userID];
 
   if (!user) {
-    return res.status(403).send("Only registred users can create short urls!");
+    return res.status(403).send(`Only <a href="/register">registered</a> users can create short urls!`);
   }
 
   let shortURLGenerated = generateRandomString();
@@ -126,7 +130,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const user = users[userID];
 
   if (!user) {
-    return res.status(403).send("Only registred users can edit urls!");
+    return res.status(403).send(`Only <a href="/register">registered</a> users can edit urls!`);
   }
 
   const shortURL = req.params.shortURL;
@@ -206,7 +210,7 @@ app.post("/login", (req, res) => {
   const user = findUserByEmail(email, users);
   
   if (!user) {
-    return res.status(404).send("User with such e-mail is not found");
+    return res.status(404).send(`User with such e-mail is not found, you can <a href="/register">register here</a>`);
   }
 
   const password = req.body.password;
